@@ -1,4 +1,4 @@
-const CACHE_NAME = 'glow-up-v1';
+const CACHE_NAME = 'glow-up-v2';
 const ASSETS = [
   './',
   './index.html',

@@ -254,6 +254,129 @@
     letter-spacing: 0.03em;
   }
 
+  /* Weight section */
+  .weight-section {
+    padding: 16px 20px 12px;
+    border-bottom: 1px solid var(--divider);
+  }
+  .weight-section-title {
+    font-size: 10px; font-weight: 600; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--gold); margin-bottom: 10px;
+  }
+  .weight-entry-row {
+    display: flex; gap: 10px; align-items: center; margin-bottom: 12px;
+  }
+  .weight-entry-row input {
+    flex: 1; background: var(--gold-faint); border: 1px solid var(--gold-light);
+    border-radius: 10px; padding: 10px 12px; font-size: 16px; font-family: inherit;
+    color: var(--text); outline: none;
+  }
+  .weight-entry-row input:focus { border-color: var(--gold); }
+  .weight-entry-row button {
+    background: var(--gold); color: white; border: none; border-radius: 10px;
+    padding: 10px 18px; font-size: 14px; font-weight: 600; font-family: inherit;
+    cursor: pointer; white-space: nowrap;
+  }
+  .weight-history {
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .weight-history-item {
+    display: flex; justify-content: space-between;
+    font-size: 13px; color: var(--text-muted); padding: 2px 0;
+  }
+  .weight-history-item .wh-val { color: var(--text); font-weight: 500; }
+
+  /* Nutrition */
+  .vitamin-row {
+    display: flex; align-items: center; padding: 10px 8px; gap: 12px;
+    border-bottom: 1px solid var(--divider); cursor: pointer;
+    -webkit-tap-highlight-color: transparent; border-radius: 8px; margin: 0 -8px;
+  }
+  .vitamin-row:active { background: var(--gold-faint); }
+  .vitamin-check {
+    width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--gold-light);
+    flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+    background: white; transition: all 0.2s;
+  }
+  .vitamin-row.done .vitamin-check { background: var(--gold); border-color: var(--gold); color: white; }
+  .vitamin-row.done .vitamin-check svg { opacity: 1; }
+  .vitamin-check svg { opacity: 0; transition: opacity 0.2s; }
+  .vitamin-label { font-size: 15px; color: var(--text); flex: 1; }
+
+  .drinks-row {
+    display: flex; align-items: center; padding: 10px 8px; gap: 12px;
+    border-bottom: 1px solid var(--divider); margin: 0 -8px;
+  }
+  .drinks-label { font-size: 15px; color: var(--text); flex: 1; }
+  .drinks-weekly {
+    font-size: 11px; font-weight: 600; color: var(--text-muted);
+    background: var(--gold-faint); padding: 3px 8px; border-radius: 10px;
+  }
+  .drinks-counter { display: flex; align-items: center; gap: 10px; }
+  .drinks-counter button {
+    width: 34px; height: 34px; border-radius: 50%; border: 1.5px solid var(--gold-light);
+    background: white; font-size: 18px; font-weight: 600; color: var(--gold);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; -webkit-tap-highlight-color: transparent;
+  }
+  .drinks-counter button:active { background: var(--gold); color: white; border-color: var(--gold); }
+  .drinks-count { font-size: 20px; font-weight: 700; min-width: 28px; text-align: center; color: var(--text); }
+
+  .meal-row {
+    display: flex; align-items: center; padding: 10px 8px; gap: 12px;
+    border-bottom: 1px solid var(--divider); cursor: pointer;
+    -webkit-tap-highlight-color: transparent; margin: 0 -8px;
+  }
+  .meal-row:last-of-type { border-bottom: none; }
+  .meal-row:active { background: var(--gold-faint); }
+  .meal-name { font-size: 15px; font-weight: 500; min-width: 90px; color: var(--text); }
+  .meal-summary { flex: 1; font-size: 13px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .meal-summary.empty { font-style: italic; opacity: 0.6; }
+  .rating-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+  .rating-dot.green { background: #7ec897; }
+  .rating-dot.yellow { background: #e8c97a; }
+  .rating-dot.red { background: #e8948a; }
+  .rating-dot.none { background: var(--divider); }
+
+  /* Meal modal */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(58,53,48,0.5); backdrop-filter: blur(4px);
+    z-index: 100; align-items: flex-end; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-sheet {
+    background: var(--bg); border-radius: 20px 20px 0 0;
+    width: 100%; max-width: 480px; padding: 28px 24px 40px;
+    animation: slide-up 0.3s cubic-bezier(0.16,1,0.3,1);
+  }
+  @keyframes slide-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
+  .modal-sheet h2 { font-size: 20px; font-family: Georgia,serif; font-weight: normal; margin-bottom: 20px; color: var(--text); }
+  .modal-form-group { margin-bottom: 16px; }
+  .modal-form-group label { display: block; font-size: 10px; font-weight: 600; margin-bottom: 6px; color: var(--gold); text-transform: uppercase; letter-spacing: 0.1em; }
+  .modal-form-group input { width: 100%; padding: 12px 14px; font-size: 16px; border: 1.5px solid var(--gold-light); border-radius: 10px; background: var(--gold-faint); font-family: inherit; color: var(--text); outline: none; }
+  .modal-form-group input:focus { border-color: var(--gold); }
+  .rating-picker { display: flex; gap: 10px; justify-content: center; margin-top: 8px; }
+  .rating-option {
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    cursor: pointer; padding: 8px 14px; border-radius: 12px; border: 2px solid transparent;
+    transition: all 0.15s; min-width: 74px;
+  }
+  .rating-circle { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; transition: transform 0.15s; }
+  .rating-option.green .rating-circle { background: #7ec897; }
+  .rating-option.yellow .rating-circle { background: #e8c97a; }
+  .rating-option.red .rating-circle { background: #e8948a; }
+  .rating-option .rating-label { font-size: 11px; font-weight: 600; color: var(--text-muted); }
+  .rating-option.selected { border-color: var(--gold); background: var(--gold-faint); }
+  .rating-option.selected .rating-circle { transform: scale(1.1); }
+  .rating-option:not(.selected) { opacity: 0.5; }
+  .rating-option.none-selected { opacity: 1; }
+  .modal-actions { display: flex; gap: 10px; margin-top: 24px; }
+  .modal-actions button { flex: 1; padding: 14px; font-size: 15px; font-weight: 600; border-radius: 12px; border: none; cursor: pointer; font-family: inherit; }
+  .btn-cancel { background: var(--gold-faint); color: var(--text-muted); border: 1.5px solid var(--gold-light) !important; }
+  .btn-save { background: var(--gold); color: white; }
+  .btn-clear { background: none; border: 1.5px solid #e8948a !important; color: #c0645a; }
+
   .text-input-row {
     padding: 6px 8px 10px 44px;
     margin: 0 -8px;
@@ -364,6 +487,14 @@
 
     <!-- ── DAILY ── -->
     <div class="tab-panel active" id="panel-daily">
+      <div class="weight-section">
+        <div class="weight-section-title">Weight</div>
+        <div class="weight-entry-row">
+          <input type="number" id="weight-input" placeholder="e.g. 62.5" step="0.1" min="0" max="300">
+          <button id="weight-save-btn">Log</button>
+        </div>
+        <div class="weight-history" id="weight-history"></div>
+      </div>
       <div class="section">
         <div class="section-header"><span>Exercise</span></div>
         <div class="item" data-id="d-jump" data-section="Exercise" data-label="10 mins jumping">
@@ -408,26 +539,11 @@
       </div>
 
       <div class="section">
-        <div class="section-header"><span>Food</span></div>
-        <div class="item" data-id="d-meal1" data-section="Food" data-label="Meal 1">
-          <div class="cb"><svg width="12" height="10" viewBox="0 0 12 10"><polyline points="1,5 4.5,9 11,1" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-          <div class="item-text"><div class="item-label">Meal 1 — protein + carb + fat + veg</div></div>
-        </div>
-        <div class="item" data-id="d-meal2" data-section="Food" data-label="Meal 2">
-          <div class="cb"><svg width="12" height="10" viewBox="0 0 12 10"><polyline points="1,5 4.5,9 11,1" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-          <div class="item-text"><div class="item-label">Meal 2 — protein + carb + fat + veg</div></div>
-        </div>
-        <div class="item" data-id="d-meal3" data-section="Food" data-label="Meal 3">
-          <div class="cb"><svg width="12" height="10" viewBox="0 0 12 10"><polyline points="1,5 4.5,9 11,1" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-          <div class="item-text"><div class="item-label">Meal 3 — protein + carb + fat + veg</div></div>
-        </div>
-        <div class="item" data-id="d-treat" data-section="Food" data-label="1 planned sweet treat">
+        <div class="section-header"><span>Nutrition</span></div>
+        <div id="nutrition-body"></div>
+        <div class="item" data-id="d-treat" data-section="Nutrition" data-label="1 planned sweet treat">
           <div class="cb"><svg width="12" height="10" viewBox="0 0 12 10"><polyline points="1,5 4.5,9 11,1" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
           <div class="item-text"><div class="item-label">1 planned sweet treat</div><div class="item-note">From batch prep — not random snacking</div></div>
-        </div>
-        <div class="number-input-row">
-          <label>Alcoholic drinks</label>
-          <input type="number" id="d-drinks" min="0" max="99" placeholder="0">
         </div>
         <div class="notes-row">
           <label>Food notes</label>
@@ -562,6 +678,38 @@
 
   </main>
 
+  <!-- Meal modal -->
+  <div class="modal-overlay" id="meal-modal-overlay">
+    <div class="modal-sheet">
+      <h2 id="meal-modal-title">Log Meal</h2>
+      <div class="modal-form-group">
+        <label for="meal-input">What did you have?</label>
+        <input type="text" id="meal-input" placeholder="e.g. Chicken + rice + salad" autocomplete="off">
+      </div>
+      <div class="modal-form-group">
+        <label>How was it?</label>
+        <div class="rating-picker" id="rating-picker">
+          <div class="rating-option green none-selected" data-rating="green">
+            <div class="rating-circle">✓</div>
+            <span class="rating-label">Healthy</span>
+          </div>
+          <div class="rating-option yellow none-selected" data-rating="yellow">
+            <div class="rating-circle">~</div>
+            <span class="rating-label">Okay</span>
+          </div>
+          <div class="rating-option red none-selected" data-rating="red">
+            <div class="rating-circle">!</div>
+            <span class="rating-label">Unhealthy</span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-actions" id="meal-modal-actions">
+        <button class="btn-cancel" id="meal-cancel">Cancel</button>
+        <button class="btn-save" id="meal-save">Save</button>
+      </div>
+    </div>
+  </div>
+
   <div id="score-bar">
     <div id="score-text"><strong id="score-count">0 of 14</strong> done</div>
     <div id="progress-track"><div id="progress-fill" style="width:0%"></div></div>
@@ -596,6 +744,14 @@
 // CONFIG — paste your Apps Script URL here after you deploy it
 // ─────────────────────────────────────────────────────────────
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzb8ErIg9_J_eQorl01WnPs4G-_p8dXbVYV3tU-ITnxoalT-76bLRYBuEwuLvUp5Hr6/exec';
+
+const MEALS = ['breakfast', 'lunch', 'dinner', 'snacks'];
+const MEAL_LABELS = { breakfast: 'Breakfast', lunch: 'Lunch', dinner: 'Dinner', snacks: 'Snacks' };
+const WEIGHT_KEY = 'glowup-weight-log';
+
+function escapeHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
 
 // ── Period keys ───────────────────────────────────────────────
 function todayKey() {
@@ -634,7 +790,7 @@ function saveState(sk, state) {
 }
 
 // ── UI ────────────────────────────────────────────────────────
-const DAILY_TOTAL = 14;
+const DAILY_TOTAL = 11;
 let activeTab = 'daily';
 
 function updateHeaderDate() {
@@ -653,7 +809,7 @@ function renderItems() {
 
 function updateScore() {
   const state = loadState(todayKey());
-  const done = Object.values(state).filter(Boolean).length;
+  const done = Object.entries(state).filter(([k,v]) => k.startsWith('d-') && v === true).length;
   const pct = Math.round((done / DAILY_TOTAL) * 100);
   document.getElementById('score-count').textContent = `${done} of ${DAILY_TOTAL}`;
   document.getElementById('progress-fill').style.width = pct + '%';
@@ -742,11 +898,211 @@ function scheduleSyncDebounced() {
   syncTimer = setTimeout(syncToSheets, 2000);
 }
 
+// ── Weight tracking ───────────────────────────────────────────
+function loadWeightLog() {
+  try { return JSON.parse(localStorage.getItem(WEIGHT_KEY) || '[]'); }
+  catch { return []; }
+}
+function saveWeightLog(log) { localStorage.setItem(WEIGHT_KEY, JSON.stringify(log)); }
+
+function renderWeightHistory() {
+  const log = loadWeightLog();
+  const el = document.getElementById('weight-history');
+  if (!el) return;
+  if (log.length === 0) {
+    el.innerHTML = '<div class="weight-history-item"><span style="color:var(--text-muted);font-style:italic">No entries yet</span></div>';
+    return;
+  }
+  el.innerHTML = log.slice(-5).reverse().map(e =>
+    `<div class="weight-history-item"><span>${e.date}</span><span class="wh-val">${e.value} kg</span></div>`
+  ).join('');
+}
+
+function initWeight() {
+  renderWeightHistory();
+  document.getElementById('weight-save-btn').addEventListener('click', () => {
+    const input = document.getElementById('weight-input');
+    const val = parseFloat(input.value);
+    if (!val || val <= 0) return;
+    const log = loadWeightLog();
+    const today = new Date().toLocaleDateString('en-AU', { day:'numeric', month:'short', year:'numeric' });
+    const existing = log.findIndex(e => e.date === today);
+    if (existing >= 0) log[existing].value = val;
+    else log.push({ date: today, value: val });
+    saveWeightLog(log);
+    input.value = '';
+    renderWeightHistory();
+    scheduleSyncDebounced();
+  });
+}
+
+// ── Nutrition ─────────────────────────────────────────────────
+function getNutritionState() {
+  const state = loadState(todayKey());
+  if (!state.meals) {
+    state.meals = {};
+    MEALS.forEach(m => { state.meals[m] = { summary: '', rating: null }; });
+  }
+  MEALS.forEach(m => { if (!state.meals[m]) state.meals[m] = { summary: '', rating: null }; });
+  return state;
+}
+
+function getWeeklyDrinks() {
+  let total = 0;
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    const sk = `day-${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+    const s = loadState(sk);
+    if (s.drinks) total += Number(s.drinks) || 0;
+  }
+  return total;
+}
+
+function renderNutrition() {
+  const nutritionBody = document.getElementById('nutrition-body');
+  if (!nutritionBody) return;
+  const state = getNutritionState();
+  const weeklyDrinks = getWeeklyDrinks();
+  let html = '';
+
+  // Vitamins
+  html += `<div class="vitamin-row${state.vitamins ? ' done' : ''}" id="vitamin-toggle">`;
+  html += `<div class="vitamin-check"><svg width="12" height="10" viewBox="0 0 12 10"><polyline points="1,5 4.5,9 11,1" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>`;
+  html += `<span class="vitamin-label">Vitamins</span></div>`;
+
+  // Drinks counter
+  const drinks = Number(state.drinks) || 0;
+  html += `<div class="drinks-row">`;
+  html += `<span class="drinks-label">Alcoholic drinks</span>`;
+  html += `<span class="drinks-weekly">${weeklyDrinks} this week</span>`;
+  html += `<div class="drinks-counter">`;
+  html += `<button id="drinks-minus">&minus;</button>`;
+  html += `<span class="drinks-count" id="drinks-count">${drinks}</span>`;
+  html += `<button id="drinks-plus">+</button>`;
+  html += `</div></div>`;
+
+  // Meal rows
+  MEALS.forEach(m => {
+    const meal = state.meals[m];
+    const hasData = meal && meal.summary;
+    const ratingClass = meal && meal.rating ? meal.rating : 'none';
+    html += `<div class="meal-row" data-meal="${m}">`;
+    html += `<span class="meal-name">${MEAL_LABELS[m]}</span>`;
+    html += `<span class="meal-summary${!hasData ? ' empty' : ''}">${hasData ? escapeHtml(meal.summary) : 'Tap to log'}</span>`;
+    html += `<div class="rating-dot ${ratingClass}"></div>`;
+    html += `</div>`;
+  });
+
+  nutritionBody.innerHTML = html;
+
+  // Vitamins toggle
+  document.getElementById('vitamin-toggle').addEventListener('click', () => {
+    const s = getNutritionState();
+    s.vitamins = !s.vitamins;
+    saveState(todayKey(), s);
+    renderNutrition();
+    updateScore();
+    scheduleSyncDebounced();
+  });
+
+  // Drinks
+  document.getElementById('drinks-minus').addEventListener('click', () => {
+    const s = getNutritionState();
+    s.drinks = Math.max(0, (Number(s.drinks) || 0) - 1);
+    saveState(todayKey(), s);
+    document.getElementById('drinks-count').textContent = s.drinks;
+    scheduleSyncDebounced();
+  });
+  document.getElementById('drinks-plus').addEventListener('click', () => {
+    const s = getNutritionState();
+    s.drinks = (Number(s.drinks) || 0) + 1;
+    saveState(todayKey(), s);
+    document.getElementById('drinks-count').textContent = s.drinks;
+    scheduleSyncDebounced();
+  });
+
+  // Meal rows
+  nutritionBody.querySelectorAll('.meal-row').forEach(row => {
+    row.addEventListener('click', () => openMealModal(row.dataset.meal));
+  });
+}
+
+// ── Meal modal ────────────────────────────────────────────────
+let editingMeal = null;
+let selectedRating = null;
+const mealOverlay = document.getElementById('meal-modal-overlay');
+const mealInput = document.getElementById('meal-input');
+const ratingPicker = document.getElementById('rating-picker');
+const mealModalActions = document.getElementById('meal-modal-actions');
+
+function openMealModal(mealKey) {
+  editingMeal = mealKey;
+  const state = getNutritionState();
+  const meal = state.meals[mealKey];
+  document.getElementById('meal-modal-title').textContent = 'Log ' + MEAL_LABELS[mealKey];
+  mealInput.value = meal.summary || '';
+  selectedRating = meal.rating || null;
+  updateRatingUI();
+  const hasClear = meal.summary || meal.rating;
+  let actHtml = '<button class="btn-cancel" id="meal-cancel">Cancel</button>';
+  if (hasClear) actHtml += '<button class="btn-clear" id="meal-clear">Clear</button>';
+  actHtml += '<button class="btn-save" id="meal-save">Save</button>';
+  mealModalActions.innerHTML = actHtml;
+  document.getElementById('meal-cancel').addEventListener('click', closeMealModal);
+  document.getElementById('meal-save').addEventListener('click', saveMeal);
+  const clearBtn = document.getElementById('meal-clear');
+  if (clearBtn) clearBtn.addEventListener('click', clearMeal);
+  mealOverlay.classList.add('open');
+  setTimeout(() => mealInput.focus(), 100);
+}
+
+function saveMeal() {
+  if (!editingMeal) return;
+  const state = getNutritionState();
+  state.meals[editingMeal] = { summary: mealInput.value.trim(), rating: selectedRating };
+  saveState(todayKey(), state);
+  closeMealModal();
+  renderNutrition();
+  scheduleSyncDebounced();
+}
+
+function clearMeal() {
+  if (!editingMeal) return;
+  const state = getNutritionState();
+  state.meals[editingMeal] = { summary: '', rating: null };
+  saveState(todayKey(), state);
+  closeMealModal();
+  renderNutrition();
+  scheduleSyncDebounced();
+}
+
+function closeMealModal() {
+  mealOverlay.classList.remove('open');
+  editingMeal = null;
+}
+
+mealOverlay.addEventListener('click', e => { if (e.target === mealOverlay) closeMealModal(); });
+
+ratingPicker.addEventListener('click', e => {
+  const opt = e.target.closest('.rating-option');
+  if (!opt) return;
+  const r = opt.dataset.rating;
+  selectedRating = selectedRating === r ? null : r;
+  updateRatingUI();
+});
+
+function updateRatingUI() {
+  ratingPicker.querySelectorAll('.rating-option').forEach(opt => {
+    opt.classList.remove('selected', 'none-selected');
+    if (selectedRating === null) opt.classList.add('none-selected');
+    else if (opt.dataset.rating === selectedRating) opt.classList.add('selected');
+  });
+}
+
 // ── Text/number fields ────────────────────────────────────────
 const TEXT_FIELDS = [
   { id: 'd-workout-note', key: 'workout-note' },
   { id: 'd-exercise-notes', key: 'exercise-notes' },
-  { id: 'd-drinks', key: 'drinks' },
   { id: 'd-food-notes', key: 'food-notes' },
 ];
 
@@ -814,6 +1170,8 @@ updateHeaderDate();
 renderItems();
 loadTextFields();
 bindTextFields();
+renderNutrition();
+initWeight();
 if (navigator.onLine) {
   setTimeout(syncToSheets, 1500);
 } else {
