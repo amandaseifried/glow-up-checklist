@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Glow-Up">
+<meta name="theme-color" content="#c9a96e">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Glow-Up Checklist</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #fdf8f5;
+    --gold: #c9a96e;
+    --gold-light: #e8d5b0;
+    --gold-faint: #f7f0e6;
+    --text: #3a3530;
+    --text-muted: #b0a898;
+    --checked-text: #c4b8ac;
+    --divider: #ede5da;
+    --tab-bg: #fff;
+    --shadow: rgba(180,150,100,0.12);
+  }
+
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 15px;
+    -webkit-font-smoothing: antialiased;
+    overscroll-behavior: none;
+  }
+
+  #app {
+    display: flex;
+    flex-direction: column;
+    height: 100dvh;
+    max-width: 480px;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  header {
+    padding: 52px 20px 16px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--divider);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .header-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+
+  header h1 {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 22px;
+    font-weight: normal;
+    color: var(--text);
+    letter-spacing: 0.02em;
+  }
+
+  header .date {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 2px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  /* Sync indicator */
+  #sync-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--text-muted);
+    margin-top: 6px;
+    flex-shrink: 0;
+    transition: background 0.4s;
+    position: relative;
+  }
+  #sync-dot.syncing {
+    background: var(--gold);
+    animation: pulse 1s infinite;
+  }
+  #sync-dot.synced { background: #7ec897; }
+  #sync-dot.offline { background: #e0a0a0; }
+  #sync-dot[title] { cursor: default; }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  main {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 8px 0 120px;
+  }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  .section { margin: 20px 0 8px; padding: 0 20px; }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .section-header span {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gold);
+    white-space: nowrap;
+  }
+
+  .section-header::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--gold-light);
+  }
+
+  .item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.15s;
+    border-radius: 8px;
+    padding: 10px 8px;
+    margin: 0 -8px;
+    border-bottom: 1px solid var(--divider);
+  }
+
+  .item:active { background: var(--gold-faint); }
+
+  .cb {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid var(--gold-light);
+    flex-shrink: 0;
+    margin-top: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    background: white;
+  }
+
+  .cb svg { opacity: 0; transition: opacity 0.2s; }
+
+  .item.checked .cb {
+    background: var(--gold);
+    border-color: var(--gold);
+  }
+  .item.checked .cb svg { opacity: 1; }
+
+  .item-text { flex: 1; line-height: 1.4; }
+
+  .item-label { color: var(--text); transition: color 0.2s; }
+
+  .item.checked .item-label {
+    color: var(--checked-text);
+    text-decoration: line-through;
+    text-decoration-color: var(--checked-text);
+  }
+
+  .item-note { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+  /* Score bar */
+  #score-bar {
+    position: fixed;
+    bottom: 72px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 40px);
+    max-width: 440px;
+    background: white;
+    border-radius: 14px;
+    padding: 12px 16px;
+    box-shadow: 0 4px 20px var(--shadow);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 9;
+    border: 1px solid var(--divider);
+    transition: opacity 0.3s;
+  }
+  #score-bar.hidden { opacity: 0; pointer-events: none; }
+  #score-text { font-size: 13px; color: var(--text-muted); white-space: nowrap; }
+  #score-text strong { color: var(--gold); font-size: 15px; }
+  #progress-track { flex: 1; height: 6px; background: var(--divider); border-radius: 99px; overflow: hidden; }
+  #progress-fill { height: 100%; background: linear-gradient(90deg, var(--gold-light), var(--gold)); border-radius: 99px; transition: width 0.4s ease; }
+  #score-pct { font-size: 12px; color: var(--text-muted); white-space: nowrap; min-width: 30px; text-align: right; }
+
+  /* Tab bar */
+  nav {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 480px;
+    background: var(--tab-bg);
+    border-top: 1px solid var(--divider);
+    display: flex;
+    padding-bottom: env(safe-area-inset-bottom);
+    z-index: 20;
+    box-shadow: 0 -4px 16px var(--shadow);
+  }
+
+  .tab-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 0 8px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    gap: 4px;
+    transition: color 0.2s;
+    color: var(--text-muted);
+  }
+  .tab-btn.active { color: var(--gold); }
+  .tab-btn svg { transition: transform 0.2s; }
+  .tab-btn.active svg { transform: scale(1.1); }
+  .tab-label { font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; font-weight: 500; }
+
+  .reset-notice {
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-muted);
+    padding: 8px 20px 0;
+    letter-spacing: 0.03em;
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <header>
+    <div class="header-row">
+      <div>
+        <h1>Glow-Up Checklist</h1>
+        <div class="date" id="header-date"></div>
+      </div>
+      <div id="sync-dot" title="Sync status"></div>
+    </div>
+  </header>
+
+  <main id="main-scroll">
+
+    <!-- ── DAILY ── -->
+    <div class="tab-panel active" id="panel-daily">
+      <div class="section">
+        <div class="section-header"><span>Exercise</span></div>
+        <div class="item" data-id="d-jump" data-section="Exercise" data-label="10 mins jumping">
+          <div class="cb"><svg width="12" height="10" viewBox="0 0 12 10"><polyline points="1,5 4.5,9 11,1" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="item-text"><div class="item-label">10 mins jumping</div><div class="item-note">Morning — wake your body up</div></div>
+        </div>
+        <div class="item" data-id="d-walk" data-section="Exercise" data-label="45 min walk / 5km">
+          <div class="cb"><svg width="12" height="10" viewBox="0 0 12 10"><polyline points="1,5 4.5,9 11,1" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="item-text"><div class="item-label">45 min walk / 5km</div><div class="item-note">Walking pad or outside</div></div>
+        </div>
+        <div class="item" data-id="d-workout" data-section="Exercise" data-label="45 min workout">
+          <div class="cb"><svg width="12" height="10" viewBox="0 0 12 10"><polyline points="1,5 4.5,9 11,1" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="item-text"><div class="item-label">45 min workout</div><div class="item-note">Weights / yoga / run / extra walk</div></div>
+        </div>
+        <div class="item" data-id="d-stretch" data-section="Exercise" data-label="10 mins stretching">
+          <div class="cb"><svg width="12" height="10" viewBox="0 0 12 10"><polyline points="1,5 4.5,9 11,1" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="item-text"><div class="item-label">10 mins stretching</div><div class="item-note">Evening</div></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header"><span>Skin</span></div>
+        <div class="item" data-id="d-am-skin" data-section="Skin" data-label="Morning skincare + SPF">
+          <div class="cb"><svg width="12" height="10" viewBox="0 0 12 10"><polyline points="1,5 4.5,9 11,1" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="item-text"><div class="item-label">Morning skincare + SPF</div><div class="item-note">Sunscreen non-negotiable</div></div>
+        </div>
+        <div class="item" data-id="d-pm-skin" data-section="Skin" data-label="Evening skincare">
+          <div class="cb"><svg width="12" height="10" viewBox="0 0 12 10"><polyline points="1,5 4.5,9 11,1" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="item-text"><div class="item-label">Evening skincare</div></div>
+        </div>
+        <div class="item" data-id="d-massage" data-section="Skin" data-label="Face massage while watching TV">
+          <div class="cb"><svg width="12" height="10" viewBox="0 0 12 10"><polyline points="1,5 4.5,9 11,1" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="item-text"><div class="item-label">Face massage while watching TV</div></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header"><span>Food</span></div>
+        <div class="item" data-id="d-meal1" data-section="Food" data-label="Meal 1">
+          <div class="cb"><svg width="12" height="10" viewBox="0 0 12 10"><polyline points="1,5 4.5,9 11,1" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="item-text"><div class="item-label">Meal 1 — protein + carb + fat + veg</div></div>
+        </div>
+        <div class="item" data-id="d-meal2" data-section="Food" data-label="Meal 2">
+          <div class="cb"><svg width="12" height="10" viewBox="0 0 12 10"><polyline points="1,5 4.5,9 11,1" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="item-text"><div class="item-label">Meal 2 — protein + carb + fat + veg</div></div>
+        </div>
+        <div class="item" data-id="d-meal3" data-section="Food" data-label="Meal 3">
+          <div class="cb"><svg width="12" height="10" viewBox="0 0 12 10"><polyline points="1,5 4.5,9 11,1" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="item-text"><div class="item-label">Meal 3 — protein + carb + fat + veg</div></div>
+        </div>
+        <div class="item" data-id="d-treat" data-section="Food" data-label="1 planned sweet treat">
+          <div class="cb"><svg width="12" height="10" viewBox="0 0 12 10"><polyline points="1,5 4.5,9 11,1" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="item-text"><div class="item-label">1 planned sweet treat</div><div class="item-note">From batch prep — not random snacking</div></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header"><span>Mind</span></div>
+        <div class="item" data-id="d-brick" data-section="Mind" data-label="Brick phone / NFC chip">
+          <div class="cb"><svg width="12" height="10" viewBox="0 0 12 10"><polyline points="1,5 4.5,9 11,1" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="item-text"><div class="item-label">Brick phone / NFC chip</div><div class="item-note">Evening — no doom-scrolling after 9pm</div></div>
+        </div>
+        <div class="item" data-id="d-journal" data-section="Mind" data-label="Journal before bed">
+          <div class="cb"><svg width="12" height="10" viewBox="0 0 12 10"><polyline points="1,5 4.5,9 11,1" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="item-text"><div class="item-label">Journal before bed</div><div class="item-note">What moved my goals forward today?</div></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header"><span>Home</span></div>
+        <div class="item" data-id="d-tidy" data-section="Home" data-label="5-minute tidy before bed">
+          <div class="cb"><svg width="12" height="10" viewBox="0 0 12 10"><polyline points="1,5 4.5,9 11,1" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="item-text"><div class="item-label">5-minute tidy before bed</div><div class="item-note">Set a timer</div></div>
+        </div>
+      </div>
+
+      <div class="reset-notice">Resets automatically each new day</div>
+    </div>
+
+    <!-- ── WEEKLY ── -->
+    <div class="tab-panel" id="panel-weekly">
+      <div class="section">
+        <div class="section-header"><span>Glow-Up Block</span></div>
+        <div class="item" data-id="w-scalp" data-section="Glow-Up Block" data-label="Rosemary scalp massage">
+          <div class="cb"><svg width="12" height="10" viewBox="0 0 12 10"><polyline points="1,5 4.5,9 11,1" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="item-text"><div class="item-label">Rosemary scalp massage</div></div>
+        </div>
+        <div class="item" data-id="w-hair-mask" data-section="Glow-Up Block" data-label="Hair mask">
+          <div class="cb"><svg width="12" height="10" viewBox="0 0 12 10"><polyline points="1,5 4.5,9 11,1" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="item-text"><div class="item-label">Hair mask</div></div>
+        </div>
+        <div class="item" data-id="w-shower" data-section="Glow-Up Block" data-label="Everything shower">
+          <div class="cb"><svg width="12" height="10" viewBox="0 0 12 10"><polyline points="1,5 4.5,9 11,1" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="item-text"><div class="item-label">Everything shower</div><div class="item-note">Exfoliate, dry brush, shave</div></div>
+        </div>
+        <div class="item" data-id="w-face-mask" data-section="Glow-Up Block" data-label="Face mask">
+          <div class="cb"><svg width="12" height="10" viewBox="0 0 12 10"><polyline points="1,5 4.5,9 11,1" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="item-text"><div class="item-label">Face mask</div></div>
+        </div>
+        <div class="item" data-id="w-teeth" data-section="Glow-Up Block" data-label="Teeth whitening">
+          <div class="cb"><svg width="12" height="10" viewBox="0 0 12 10"><polyline points="1,5 4.5,9 11,1" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="item-text"><div class="item-label">Teeth whitening</div></div>
+        </div>
+        <div class="item" data-id="w-nails" data-section="Glow-Up Block" data-label="Nails">
+          <div class="cb"><svg width="12" height="10" viewBox="0 0 12 10"><polyline points="1,5 4.5,9 11,1" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="item-text"><div class="item-label">Nails</div></div>
+        </div>
+        <div class="item" data-id="w-brows" data-section="Glow-Up Block" data-label="Tweeze brows">
+          <div class="cb"><svg width="12" height="10" viewBox="0 0 12 10"><polyline points="1,5 4.5,9 11,1" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="item-text"><div class="item-label">Tweeze brows</div></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header"><span>Food & Home</span></div>
+        <div class="item" data-id="w-meal-plan" data-section="Food & Home" data-label="Meal plan for the week">
+          <div class="cb"><svg width="12" height="10" viewBox="0 0 12 10"><polyline points="1,5 4.5,9 11,1" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="item-text"><div class="item-label">Meal plan for the week</div></div>
+        </div>
+        <div class="item" data-id="w-grocery" data-section="Food & Home" data-label="Grocery order placed">
+          <div class="cb"><svg width="12" height="10" viewBox="0 0 12 10"><polyline points="1,5 4.5,9 11,1" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="item-text"><div class="item-label">Grocery order placed</div></div>
+        </div>
+        <div class="item" data-id="w-batch" data-section="Food & Home" data-label="Batch prep sweet treats">
+          <div class="cb"><svg width="12" height="10" viewBox="0 0 12 10"><polyline points="1,5 4.5,9 11,1" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="item-text"><div class="item-label">Batch prep sweet treats</div><div class="item-note">Snickers bites / Reese's balls / PB bars</div></div>
+        </div>
+        <div class="item" data-id="w-laundry" data-section="Food & Home" data-label="Wash bed sheets + towels">
+          <div class="cb"><svg width="12" height="10" viewBox="0 0 12 10"><polyline points="1,5 4.5,9 11,1" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="item-text"><div class="item-label">Wash bed sheets + towels</div></div>
+        </div>
+        <div class="item" data-id="w-phone" data-section="Food & Home" data-label="Sanitize phone">
+          <div class="cb"><svg width="12" height="10" viewBox="0 0 12 10"><polyline points="1,5 4.5,9 11,1" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="item-text"><div class="item-label">Sanitize phone</div></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header"><span>Planning</span></div>
+        <div class="item" data-id="w-review" data-section="Planning" data-label="Sunday weekly review">
+          <div class="cb"><svg width="12" height="10" viewBox="0 0 12 10"><polyline points="1,5 4.5,9 11,1" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="item-text"><div class="item-label">Sunday weekly review</div></div>
+        </div>
+      </div>
+
+      <div class="reset-notice">Resets automatically every Monday</div>
+    </div>
+
+    <!-- ── MONTHLY ── -->
+    <div class="tab-panel" id="panel-monthly">
+      <div class="section">
+        <div class="section-header"><span>Body & Skin</span></div>
+        <div class="item" data-id="m-massage" data-section="Body & Skin" data-label="Massage booked + done">
+          <div class="cb"><svg width="12" height="10" viewBox="0 0 12 10"><polyline points="1,5 4.5,9 11,1" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="item-text"><div class="item-label">Massage booked + done</div></div>
+        </div>
+        <div class="item" data-id="m-ipl" data-section="Body & Skin" data-label="Skin treatment / IPL">
+          <div class="cb"><svg width="12" height="10" viewBox="0 0 12 10"><polyline points="1,5 4.5,9 11,1" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="item-text"><div class="item-label">Skin treatment / IPL</div></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header"><span>Mind & Planning</span></div>
+        <div class="item" data-id="m-review" data-section="Mind & Planning" data-label="Monthly review">
+          <div class="cb"><svg width="12" height="10" viewBox="0 0 12 10"><polyline points="1,5 4.5,9 11,1" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="item-text"><div class="item-label">Monthly review</div><div class="item-note">What went well, what drained me, stop/start/continue</div></div>
+        </div>
+        <div class="item" data-id="m-10list" data-section="Mind & Planning" data-label="Monthly 10 list">
+          <div class="cb"><svg width="12" height="10" viewBox="0 0 12 10"><polyline points="1,5 4.5,9 11,1" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="item-text"><div class="item-label">Monthly 10 list</div><div class="item-note">10 low-pressure things to try this month</div></div>
+        </div>
+        <div class="item" data-id="m-curriculum" data-section="Mind & Planning" data-label="Personal curriculum">
+          <div class="cb"><svg width="12" height="10" viewBox="0 0 12 10"><polyline points="1,5 4.5,9 11,1" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="item-text"><div class="item-label">Personal curriculum</div><div class="item-note">One subject to go deep on this month</div></div>
+        </div>
+      </div>
+
+      <div class="reset-notice">Resets automatically on the 1st of each month</div>
+    </div>
+
+  </main>
+
+  <div id="score-bar">
+    <div id="score-text"><strong id="score-count">0 of 14</strong> done</div>
+    <div id="progress-track"><div id="progress-fill" style="width:0%"></div></div>
+    <div id="score-pct">0%</div>
+  </div>
+
+  <nav>
+    <button class="tab-btn active" data-tab="daily">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+      </svg>
+      <span class="tab-label">Daily</span>
+    </button>
+    <button class="tab-btn" data-tab="weekly">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2z"/><polyline points="12 6 12 12 16 14"/>
+      </svg>
+      <span class="tab-label">Weekly</span>
+    </button>
+    <button class="tab-btn" data-tab="monthly">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/>
+      </svg>
+      <span class="tab-label">Monthly</span>
+    </button>
+  </nav>
+
+</div>
+
+<script>
+// ─────────────────────────────────────────────────────────────
+// CONFIG — paste your Apps Script URL here after you deploy it
+// ─────────────────────────────────────────────────────────────
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzb8ErIg9_J_eQorl01WnPs4G-_p8dXbVYV3tU-ITnxoalT-76bLRYBuEwuLvUp5Hr6/exec';
+
+// ── Period keys ───────────────────────────────────────────────
+function todayKey() {
+  const d = new Date();
+  return `day-${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+}
+function weekKey() {
+  const d = new Date();
+  const day = d.getDay();
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+  const mon = new Date(new Date().setDate(diff));
+  return `week-${mon.getFullYear()}-${mon.getMonth()}-${mon.getDate()}`;
+}
+function monthKey() {
+  const d = new Date();
+  return `month-${d.getFullYear()}-${d.getMonth()}`;
+}
+function getStorageKey(id) {
+  if (id.startsWith('d-')) return todayKey();
+  if (id.startsWith('w-')) return weekKey();
+  if (id.startsWith('m-')) return monthKey();
+}
+function getTab(id) {
+  if (id.startsWith('d-')) return 'daily';
+  if (id.startsWith('w-')) return 'weekly';
+  if (id.startsWith('m-')) return 'monthly';
+}
+
+// ── State helpers ─────────────────────────────────────────────
+function loadState(sk) {
+  try { return JSON.parse(localStorage.getItem(sk) || '{}'); }
+  catch { return {}; }
+}
+function saveState(sk, state) {
+  localStorage.setItem(sk, JSON.stringify(state));
+}
+
+// ── UI ────────────────────────────────────────────────────────
+const DAILY_TOTAL = 14;
+let activeTab = 'daily';
+
+function updateHeaderDate() {
+  const opts = { weekday: 'long', month: 'long', day: 'numeric' };
+  document.getElementById('header-date').textContent =
+    new Date().toLocaleDateString('en-AU', opts);
+}
+
+function renderItems() {
+  document.querySelectorAll('.item').forEach(el => {
+    const state = loadState(getStorageKey(el.dataset.id));
+    el.classList.toggle('checked', !!state[el.dataset.id]);
+  });
+  updateScore();
+}
+
+function updateScore() {
+  const state = loadState(todayKey());
+  const done = Object.values(state).filter(Boolean).length;
+  const pct = Math.round((done / DAILY_TOTAL) * 100);
+  document.getElementById('score-count').textContent = `${done} of ${DAILY_TOTAL}`;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('score-pct').textContent = pct + '%';
+  document.getElementById('score-bar').classList.toggle('hidden', activeTab !== 'daily');
+}
+
+// ── Sync ──────────────────────────────────────────────────────
+const dot = document.getElementById('sync-dot');
+let syncTimer = null;
+
+function setSyncStatus(status) {
+  dot.className = '';
+  if (status) dot.classList.add(status);
+  const labels = { syncing: 'Syncing…', synced: 'Synced to Google Sheets', offline: 'Offline — will sync when connected', '': 'Waiting' };
+  dot.title = labels[status] || '';
+}
+
+function buildPayload() {
+  const now = new Date();
+  const dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const dailyState = loadState(todayKey());
+  const weeklyState = loadState(weekKey());
+  const monthlyState = loadState(monthKey());
+
+  const dailyDone = Object.values(dailyState).filter(Boolean).length;
+  const weeklyDone = Object.values(weeklyState).filter(Boolean).length;
+  const monthlyDone = Object.values(monthlyState).filter(Boolean).length;
+
+  const dateStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+
+  const details = [];
+  document.querySelectorAll('.item').forEach(el => {
+    const id = el.dataset.id;
+    const tab = getTab(id);
+    let checked = false;
+    if (tab === 'daily') checked = !!dailyState[id];
+    else if (tab === 'weekly') checked = !!weeklyState[id];
+    else if (tab === 'monthly') checked = !!monthlyState[id];
+    details.push({
+      tab,
+      section: el.dataset.section,
+      label: el.dataset.label,
+      checked
+    });
+  });
+
+  return {
+    summary: {
+      date: dateStr,
+      day: dayNames[now.getDay()],
+      score: dailyDone,
+      percentage: Math.round((dailyDone / DAILY_TOTAL) * 100),
+      weeklyDone,
+      monthlyDone
+    },
+    details
+  };
+}
+
+async function syncToSheets() {
+  if (!SCRIPT_URL || SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') return;
+  if (!navigator.onLine) { setSyncStatus('offline'); return; }
+
+  setSyncStatus('syncing');
+  try {
+    const payload = buildPayload();
+    await fetch(SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+      headers: { 'Content-Type': 'text/plain' } // avoids CORS preflight
+    });
+    setSyncStatus('synced');
+    setTimeout(() => setSyncStatus(''), 3000);
+  } catch {
+    setSyncStatus('offline');
+  }
+}
+
+function scheduleSyncDebounced() {
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(syncToSheets, 2000);
+}
+
+// ── Item tap ──────────────────────────────────────────────────
+document.querySelectorAll('.item').forEach(el => {
+  el.addEventListener('click', () => {
+    const id = el.dataset.id;
+    const sk = getStorageKey(id);
+    const state = loadState(sk);
+    state[id] = !state[id];
+    saveState(sk, state);
+    el.classList.toggle('checked', !!state[id]);
+    if (id.startsWith('d-')) updateScore();
+    scheduleSyncDebounced();
+  });
+});
+
+// ── Tabs ──────────────────────────────────────────────────────
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    activeTab = btn.dataset.tab;
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('panel-' + activeTab).classList.add('active');
+    document.getElementById('main-scroll').scrollTop = 0;
+    updateScore();
+  });
+});
+
+// ── Online/offline ────────────────────────────────────────────
+window.addEventListener('online', () => syncToSheets());
+window.addEventListener('offline', () => setSyncStatus('offline'));
+
+// ── Service worker ────────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(() => {});
+}
+
+// ── Boot ──────────────────────────────────────────────────────
+updateHeaderDate();
+renderItems();
+if (navigator.onLine) {
+  setTimeout(syncToSheets, 1500);
+} else {
+  setSyncStatus('offline');
+}
+</script>
+</body>
+</html>
