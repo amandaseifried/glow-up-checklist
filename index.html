@@ -490,7 +490,7 @@
       <div class="weight-section">
         <div class="weight-section-title">Weight</div>
         <div class="weight-entry-row">
-          <input type="number" id="weight-input" placeholder="e.g. 62.5" step="0.1" min="0" max="300">
+          <input type="number" id="weight-input" placeholder="e.g. 135" step="0.1" min="0" max="999">
           <button id="weight-save-btn">Log</button>
         </div>
         <div class="weight-history" id="weight-history"></div>
@@ -914,7 +914,7 @@ function renderWeightHistory() {
     return;
   }
   el.innerHTML = log.slice(-5).reverse().map(e =>
-    `<div class="weight-history-item"><span>${e.date}</span><span class="wh-val">${e.value} kg</span></div>`
+    `<div class="weight-history-item"><span>${e.date}</span><span class="wh-val">${e.value} lbs</span></div>`
   ).join('');
 }
 
