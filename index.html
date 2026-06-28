@@ -253,6 +253,98 @@
     padding: 8px 20px 0;
     letter-spacing: 0.03em;
   }
+
+  .text-input-row {
+    padding: 6px 8px 10px 44px;
+    margin: 0 -8px;
+    border-bottom: 1px solid var(--divider);
+  }
+
+  .text-input-row input,
+  .text-input-row textarea {
+    width: 100%;
+    background: var(--gold-faint);
+    border: 1px solid var(--gold-light);
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-size: 13px;
+    font-family: inherit;
+    color: var(--text);
+    outline: none;
+    resize: none;
+  }
+
+  .text-input-row input::placeholder,
+  .text-input-row textarea::placeholder {
+    color: var(--text-muted);
+  }
+
+  .text-input-row input:focus,
+  .text-input-row textarea:focus {
+    border-color: var(--gold);
+  }
+
+  .notes-row {
+    padding: 10px 8px 10px;
+    margin: 0 -8px;
+  }
+
+  .notes-row label {
+    display: block;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 6px;
+  }
+
+  .notes-row textarea {
+    width: 100%;
+    background: var(--gold-faint);
+    border: 1px solid var(--gold-light);
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-size: 13px;
+    font-family: inherit;
+    color: var(--text);
+    outline: none;
+    resize: none;
+    min-height: 64px;
+  }
+
+  .notes-row textarea::placeholder { color: var(--text-muted); }
+  .notes-row textarea:focus { border-color: var(--gold); }
+
+  .number-input-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 8px;
+    margin: 0 -8px;
+    border-bottom: 1px solid var(--divider);
+  }
+
+  .number-input-row label {
+    flex: 1;
+    font-size: 15px;
+    color: var(--text);
+  }
+
+  .number-input-row input[type=number] {
+    width: 64px;
+    background: var(--gold-faint);
+    border: 1px solid var(--gold-light);
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 15px;
+    font-family: inherit;
+    color: var(--text);
+    outline: none;
+    text-align: center;
+  }
+
+  .number-input-row input[type=number]:focus { border-color: var(--gold); }
 </style>
 </head>
 <body>
@@ -286,9 +378,16 @@
           <div class="cb"><svg width="12" height="10" viewBox="0 0 12 10"><polyline points="1,5 4.5,9 11,1" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
           <div class="item-text"><div class="item-label">45 min workout</div><div class="item-note">Weights / yoga / run / extra walk</div></div>
         </div>
+        <div class="text-input-row">
+          <input type="text" id="d-workout-note" placeholder="What did you do?" maxlength="120">
+        </div>
         <div class="item" data-id="d-stretch" data-section="Exercise" data-label="10 mins stretching">
           <div class="cb"><svg width="12" height="10" viewBox="0 0 12 10"><polyline points="1,5 4.5,9 11,1" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
           <div class="item-text"><div class="item-label">10 mins stretching</div><div class="item-note">Evening</div></div>
+        </div>
+        <div class="notes-row">
+          <label>Exercise notes</label>
+          <textarea id="d-exercise-notes" placeholder="Any notes on today's movement…" rows="2"></textarea>
         </div>
       </div>
 
@@ -325,6 +424,14 @@
         <div class="item" data-id="d-treat" data-section="Food" data-label="1 planned sweet treat">
           <div class="cb"><svg width="12" height="10" viewBox="0 0 12 10"><polyline points="1,5 4.5,9 11,1" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
           <div class="item-text"><div class="item-label">1 planned sweet treat</div><div class="item-note">From batch prep — not random snacking</div></div>
+        </div>
+        <div class="number-input-row">
+          <label>Alcoholic drinks</label>
+          <input type="number" id="d-drinks" min="0" max="99" placeholder="0">
+        </div>
+        <div class="notes-row">
+          <label>Food notes</label>
+          <textarea id="d-food-notes" placeholder="Any notes on today's food…" rows="2"></textarea>
         </div>
       </div>
 
@@ -601,7 +708,11 @@ function buildPayload() {
       score: dailyDone,
       percentage: Math.round((dailyDone / DAILY_TOTAL) * 100),
       weeklyDone,
-      monthlyDone
+      monthlyDone,
+      workoutNote: dailyState['workout-note'] || '',
+      exerciseNotes: dailyState['exercise-notes'] || '',
+      drinks: dailyState['drinks'] || '',
+      foodNotes: dailyState['food-notes'] || ''
     },
     details
   };
@@ -629,6 +740,37 @@ async function syncToSheets() {
 function scheduleSyncDebounced() {
   clearTimeout(syncTimer);
   syncTimer = setTimeout(syncToSheets, 2000);
+}
+
+// ── Text/number fields ────────────────────────────────────────
+const TEXT_FIELDS = [
+  { id: 'd-workout-note', key: 'workout-note' },
+  { id: 'd-exercise-notes', key: 'exercise-notes' },
+  { id: 'd-drinks', key: 'drinks' },
+  { id: 'd-food-notes', key: 'food-notes' },
+];
+
+function loadTextFields() {
+  const sk = todayKey();
+  const state = loadState(sk);
+  TEXT_FIELDS.forEach(({ id, key }) => {
+    const el = document.getElementById(id);
+    if (el) el.value = state[key] || '';
+  });
+}
+
+function bindTextFields() {
+  TEXT_FIELDS.forEach(({ id, key }) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('input', () => {
+      const sk = todayKey();
+      const state = loadState(sk);
+      state[key] = el.value;
+      saveState(sk, state);
+      scheduleSyncDebounced();
+    });
+  });
 }
 
 // ── Item tap ──────────────────────────────────────────────────
@@ -670,6 +812,8 @@ if ('serviceWorker' in navigator) {
 // ── Boot ──────────────────────────────────────────────────────
 updateHeaderDate();
 renderItems();
+loadTextFields();
+bindTextFields();
 if (navigator.onLine) {
   setTimeout(syncToSheets, 1500);
 } else {
